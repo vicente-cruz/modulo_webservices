@@ -1,0 +1,72 @@
+Aula 1:
+Noções de RESTful - Texto, JSON, GET, POST
+
+Ex1) Facebook: Faz requisição ao WS deles para obter os feed de noticias.
+    - GET http://api.facebook.com/feed/list
+    - Retorna info, normalmente em um JSON.
+Ou
+    - POST http://api.facebook.com/feed/inserir
+    - Envia info.
+
+Ex2) Busca uma info: http://www.checkitout.com.br/wb/get_menu_categories
+
+Aula 2:
+Login no Facebook.
+a) Baixar a ultima versão da biblioteca PHP do FB em https://github.com/facebook/php-graph-sdk
+b) Extrair a pasta "Facebook" e colocar no diretório do projeto.
+    Ex: modulo_webservices/Facebook
+c) Criar o arquivo "fb.php"
+d) Carregar o "autoload.php"
+e) buscar o "app_id" em developers.facebook.com
+    - Fazer login
+    - Ir em My Apps -> Add a New App. Informar nome e e-mail.
+    - Copiar o APP ID em 'Settings -> Basic' e inserir no campo 'app_id' => ''
+    - Idem para o 'secret'
+    OBS: de preferência, usar a última versão. Ex: 'v3.0'
+f) Em 'index.php' -> require 'fb.php'
+g) Em 'login.php' ->
+        require 'fb.php';
+        $helper = $fb->getRedirectLoginHelper();
+        $permissions = array('email');
+        $loginUrl = $helper->getLoginUrl('<URL_de_callback>', $permissions);
+h) Em 'callback.php' ->
+    require 'fb.php';
+    $helper = $fb->getRedirectLoginHelper();
+    try { $meuToken = $helper->getAccessToken(); }
+    catch(Facebook\Exceptions\FacebookResponseException $e) {}
+    catch(Facebook\Exceptions\FacebookSDKException $e) {}
+
+i)  Em 'index.php' ->
+    $res = $fb->get('/me?fields=email,name,id',$_SESSION['fb_access_token']);
+    $r = json_decode($res->getBody());
+    echo "Meu nome: ".$r->name;
+
+Aula 3: Facebook OpenGraph API
+a) Ir em developers.facebook.com -> Tools -> Graph API Explorer.
+b) Em Application, colocar a aplicação criada. Ex: "AppTeste"
+c) Testar alguns comandos e ver o retorno do JSON:
+    GET me
+    GET me?fields=name,id,email,picture
+d) Ir em Docs -> Graph API, e Using the Graph API. Testar os diferentes parametros
+    Ex 1: pegar a foto do perfil:
+        $res = $fb->('/me?fields=email,name,id,picture',$_SESSION['fb_access_token']);
+        $r = json_decode($res->getBody());
+        $img = $r->picture->data->url;
+        echo "<img src='".$img."' border=0 />";
+    Ex 2: Pegar as fotos e posts (limitar em 5):
+        1) Ir em "User Access Token" e habilitar a "user_photos", "user_posts"
+        $res = $fb->('/me?fields=email,name,id,photos,posts.limit(5)',$_SESSION['fb_access_token']);
+
+Aula 4: Twitter API
+Acessar "apps.twitter.com" e "Create New App".
+    Dar Nome, descrição e Website (pode colocar "QUALQUER" website).
+    Ignorar Callback por hora. Ao usar, colocar 127.0.0.1 (NÃO COLOCAR LOCALHOST)
+Acessar "dev.twitter.com" -> Developer utilities -> Twitter libraries -> PHP.
+    Baixar a twitteroauth by @abraham
+    Criar a pasta "twitteroauth" dentro da pasta do projeto
+    Copiar os arquivos autoload.php e src/ para dentro de "twitteroauth"
+Criar o index.php, twconfig.php
+Acessar o aplicativo na webpage
+    ir em Keys and Access Tokens e peger o consumer_key e consumer_secret
+Buscar em REST API como postar no Twitter:
+    https://developer.twitter.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update
